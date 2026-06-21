@@ -1,0 +1,14 @@
+## Android SDK (Android Studio가 자동 생성하는 항목)
+sdk.dir=C\:\\Users\\YOUR_NAME\\AppData\\Local\\Android\\Sdk
+
+## 날씨 API 키 — 이 파일을 local.properties 로 복사한 뒤 실제 키를 입력하세요.
+## local.properties 는 Git에 올라가지 않습니다.
+
+# 기상청 단기예보 (공공데이터포털 → 일반 인증키 Decoding)
+KMA_SERVICE_KEY=your_kma_decoding_key_here
+
+# OpenWeatherMap (https://openweathermap.org/api)
+OWM_API_KEY=your_openweathermap_api_key_here
+
+# 사용할 API: KMA 또는 OWM
+WEATHER_PROVIDER=KMA

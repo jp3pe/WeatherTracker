@@ -1,5 +1,6 @@
 package com.example.weathertracker.core.di
 
+import com.example.weathertracker.BuildConfig
 import com.example.weathertracker.data.local.region.RegionDataSource
 import com.example.weathertracker.data.local.region.StaticRegionDataSource
 import com.example.weathertracker.data.mapper.KmaWeatherMapper
@@ -29,7 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory
  * 각 의존성을 명시적으로 구성한다. provider 교체(KMA ↔ OWM)는 [config] 한 곳에서 결정된다.
  */
 class AppContainer(
-    private val config: WeatherApiConfig = DEFAULT_CONFIG,
+    private val config: WeatherApiConfig = fromBuildConfig(),
 ) {
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
@@ -80,12 +81,30 @@ class AppContainer(
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private companion object {
-        // TODO: 실제 키는 local.properties → BuildConfig 로 주입하세요.
-        val DEFAULT_CONFIG = WeatherApiConfig(
-            provider = WeatherProvider.KMA,
-            kmaServiceKey = "REPLACE_WITH_KMA_SERVICE_KEY",
-            owmApiKey = "REPLACE_WITH_OWM_API_KEY",
-        )
+    companion object {
+        fun fromBuildConfig(): WeatherApiConfig {
+            val provider = when (BuildConfig.WEATHER_PROVIDER.uppercase()) {
+                "OWM", "OPEN_WEATHER_MAP" -> WeatherProvider.OPEN_WEATHER_MAP
+                else -> WeatherProvider.KMA
+            }
+
+            val config = WeatherApiConfig(
+                provider = provider,
+                kmaServiceKey = BuildConfig.KMA_SERVICE_KEY,
+                owmApiKey = BuildConfig.OWM_API_KEY,
+            )
+
+            when (config.provider) {
+                WeatherProvider.KMA -> require(config.kmaServiceKey.isNotBlank()) {
+                    "KMA_SERVICE_KEY가 local.properties에 설정되지 않았습니다."
+                }
+
+                WeatherProvider.OPEN_WEATHER_MAP -> require(config.owmApiKey.isNotBlank()) {
+                    "OWM_API_KEY가 local.properties에 설정되지 않았습니다."
+                }
+            }
+
+            return config
+        }
     }
 }
